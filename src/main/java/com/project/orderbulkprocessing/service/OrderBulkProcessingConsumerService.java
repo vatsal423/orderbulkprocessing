@@ -59,12 +59,12 @@ public class OrderBulkProcessingConsumerService {
 
     private void orderUpdateService(OrderUpdateDTO orderUpdateDTO) {
         Optional<Orders> optionalOrder = orderRepository.findById(UUID.fromString(orderUpdateDTO.getOrderId()));
-        if(optionalOrder.isEmpty()){
+        if(optionalOrder.isPresent()){
             log.error("Invalid Order Id!");
             return;
         }
         Optional<OrderStatus> optionalOrderStatus = orderStatusRepository.findById(UUID.fromString(orderUpdateDTO.getOrderStatusId()));
-        if(optionalOrderStatus.isEmpty()){
+        if(optionalOrderStatus.isPresent()){
             log.error("Invalid Order Status!");
             return;
         }
@@ -84,7 +84,7 @@ public class OrderBulkProcessingConsumerService {
             order.setId(orderId);
 
             Optional<Customers> customer = customerRepository.findById(UUID.fromString(orderCreateDTO.getCustomerId()));
-            if (customer.isEmpty()) {
+            if (customer.isPresent()) {
                 log.error("Invalid Customer!");
                 return;
             } else
@@ -94,7 +94,7 @@ public class OrderBulkProcessingConsumerService {
             order.setOrderStatus(orderStatus);
 
             Optional<Shipping> shipping = shippingRepository.findById(UUID.fromString(orderCreateDTO.getShippingId()));
-            if (shipping.isEmpty()) {
+            if (shipping.isPresent()) {
                 log.error("Invalid Shipping Method!");
                 return;
             } else
@@ -104,7 +104,7 @@ public class OrderBulkProcessingConsumerService {
             List<ItemCreateDTO> itemCreateDTOList = orderCreateDTO.getItems();
             for (int i = 0; i < itemCreateDTOList.size(); i++) {
                 Optional<Items> item = itemRepository.findById(UUID.fromString(itemCreateDTOList.get(i).getItemId()));
-                if (item.isEmpty()) {
+                if (item.isPresent()) {
                     log.error("Invalid Item" + i + 1 + "!");
                     return;
                 } else {
@@ -155,7 +155,7 @@ public class OrderBulkProcessingConsumerService {
             Payments payment = new Payments();
             payment.setId(UUID.randomUUID());
             Optional<PaymentsType> paymentsType = paymentsTypeRepository.findById(UUID.fromString(paymentCreateDTOList.get(i).getPaymentTypeId()));
-            if (paymentsType.isEmpty()) {
+            if (paymentsType.isPresent()) {
                 log.error("Invalid Payment Method!");
                 return;
             } else

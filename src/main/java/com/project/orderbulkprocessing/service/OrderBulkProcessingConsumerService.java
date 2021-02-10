@@ -1,6 +1,9 @@
 package com.project.orderbulkprocessing.service;
 
-import com.project.orderbulkprocessing.dto.*;
+import com.project.orderbulkprocessing.dto.ItemCreateDTO;
+import com.project.orderbulkprocessing.dto.OrderCreateDTO;
+import com.project.orderbulkprocessing.dto.OrderUpdateDTO;
+import com.project.orderbulkprocessing.dto.PaymentCreateDTO;
 import com.project.orderbulkprocessing.model.*;
 import com.project.orderbulkprocessing.repository.*;
 import org.apache.logging.log4j.LogManager;
@@ -59,12 +62,12 @@ public class OrderBulkProcessingConsumerService {
 
     private void orderUpdateService(OrderUpdateDTO orderUpdateDTO) {
         Optional<Orders> optionalOrder = orderRepository.findById(UUID.fromString(orderUpdateDTO.getOrderId()));
-        if(optionalOrder.isPresent()){
+        if (!optionalOrder.isPresent()) {
             log.error("Invalid Order Id!");
             return;
         }
         Optional<OrderStatus> optionalOrderStatus = orderStatusRepository.findById(UUID.fromString(orderUpdateDTO.getOrderStatusId()));
-        if(optionalOrderStatus.isPresent()){
+        if (!optionalOrderStatus.isPresent()) {
             log.error("Invalid Order Status!");
             return;
         }
@@ -84,7 +87,7 @@ public class OrderBulkProcessingConsumerService {
             order.setId(orderId);
 
             Optional<Customers> customer = customerRepository.findById(UUID.fromString(orderCreateDTO.getCustomerId()));
-            if (customer.isPresent()) {
+            if (!customer.isPresent()) {
                 log.error("Invalid Customer!");
                 return;
             } else
@@ -94,7 +97,7 @@ public class OrderBulkProcessingConsumerService {
             order.setOrderStatus(orderStatus);
 
             Optional<Shipping> shipping = shippingRepository.findById(UUID.fromString(orderCreateDTO.getShippingId()));
-            if (shipping.isPresent()) {
+            if (!shipping.isPresent()) {
                 log.error("Invalid Shipping Method!");
                 return;
             } else
@@ -104,7 +107,7 @@ public class OrderBulkProcessingConsumerService {
             List<ItemCreateDTO> itemCreateDTOList = orderCreateDTO.getItems();
             for (int i = 0; i < itemCreateDTOList.size(); i++) {
                 Optional<Items> item = itemRepository.findById(UUID.fromString(itemCreateDTOList.get(i).getItemId()));
-                if (item.isPresent()) {
+                if (!item.isPresent()) {
                     log.error("Invalid Item" + i + 1 + "!");
                     return;
                 } else {
@@ -140,34 +143,34 @@ public class OrderBulkProcessingConsumerService {
     private void paymentItemCreateService(OrderCreateDTO orderCreateDTO, Orders order) {
 
         List<ItemCreateDTO> itemCreateDTOList = orderCreateDTO.getItems();
-        for (int i = 0; i < itemCreateDTOList.size(); i++) {
+        for (ItemCreateDTO itemCreateDTO : itemCreateDTOList) {
             OrderItems orderItem = new OrderItems();
             orderItem.setId(UUID.randomUUID());
             orderItem.setOrders(order);
-            Optional<Items> item = itemRepository.findById(UUID.fromString(itemCreateDTOList.get(i).getItemId()));
+            Optional<Items> item = itemRepository.findById(UUID.fromString(itemCreateDTO.getItemId()));
             orderItem.setItems(item.get());
-            orderItem.setQuantity(itemCreateDTOList.get(i).getQuantity());
+            orderItem.setQuantity(itemCreateDTO.getQuantity());
             orderItemRepository.save(orderItem);
         }
 
         List<PaymentCreateDTO> paymentCreateDTOList = orderCreateDTO.getPayments();
-        for (int i = 0; i < paymentCreateDTOList.size(); i++) {
+        for (PaymentCreateDTO paymentCreateDTO : paymentCreateDTOList) {
             Payments payment = new Payments();
             payment.setId(UUID.randomUUID());
-            Optional<PaymentsType> paymentsType = paymentsTypeRepository.findById(UUID.fromString(paymentCreateDTOList.get(i).getPaymentTypeId()));
-            if (paymentsType.isPresent()) {
+            Optional<PaymentsType> paymentsType = paymentsTypeRepository.findById(UUID.fromString(paymentCreateDTO.getPaymentTypeId()));
+            if (!paymentsType.isPresent()) {
                 log.error("Invalid Payment Method!");
                 return;
             } else
                 payment.setPaymentsType(paymentsType.get());
             payment.setOrders(order);
-            payment.setAddressLine1(paymentCreateDTOList.get(i).getAddressLine1());
-            payment.setCardNo(paymentCreateDTOList.get(i).getCardNo());
-            payment.setAddressLine2(paymentCreateDTOList.get(i).getAddressLine2());
-            payment.setCity(paymentCreateDTOList.get(i).getCity());
-            payment.setState(paymentCreateDTOList.get(i).getState());
-            payment.setZip(paymentCreateDTOList.get(i).getZip());
-            payment.setAmount(paymentCreateDTOList.get(i).getAmount());
+            payment.setAddressLine1(paymentCreateDTO.getAddressLine1());
+            payment.setCardNo(paymentCreateDTO.getCardNo());
+            payment.setAddressLine2(paymentCreateDTO.getAddressLine2());
+            payment.setCity(paymentCreateDTO.getCity());
+            payment.setState(paymentCreateDTO.getState());
+            payment.setZip(paymentCreateDTO.getZip());
+            payment.setAmount(paymentCreateDTO.getAmount());
             payment.setDate(new Date());
             payment.setConfirmationNumber(UUID.randomUUID().toString());
             paymentRepository.save(payment);
